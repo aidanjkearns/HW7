@@ -63,7 +63,7 @@ api = tweepy.API(auth, parser=tweepy.parsers.JSONParser())
 #### Recommended order of tasks: ####
 ## 1. Set up the caching pattern start -- the dictionary and the try/except 
 ## 		statement shown in class.
-CACHE_FILE = 'twitter_search.json'
+CACHE_FNAME = 'twitter_search.json' #Create Cache file
 try:
 	cache_file = open(CACHE_FNAME, 'r')
 	cache_contents = cache_file.read()
@@ -76,31 +76,42 @@ except:
 ## 		so it either gets new data or caches data, depending upon what the input 
 ##		to search for is. 
 def getTwitterData(loc):
-	if loc in CACHE_DICTION:
-		print("Data was in the cache")
-		return CACHE_DICTION[loc]
-	else:
-		print("Making a request for new data...")
-		results = api.search(q = loc)
-		try:
-			CACHE_DICTION[loc] = json.loads(data)
-			dumped_json_cache = json.dumps(CACHE_DICTION)
-			fw = open(CACHE_FNAME, "w")
-			fw.write(dumped_json_cache)
-			fw.close()
-			return CACHE_DICTION[loc]
-		except:
-			print("Wasn't in cache and wasn't valid search either")
-			return None
+    if loc in CACHE_DICTION:		#if search has already been done
+        print("Data was in the cache")
+        return CACHE_DICTION[loc]
+    else:
+        print("Making a request for new data...")#search twitter for input
+        data = api.search(q=loc)
+        try:
+            CACHE_DICTION[loc] =  data
+            dumped_json_cache = json.dumps(CACHE_DICTION)#create new cache for search 
+            fw = open(CACHE_FNAME,"w")
+            fw.write(dumped_json_cache)
+            fw.close() # Close the open file
+            return CACHE_DICTION[loc]
+        except:
+            print("Wasn't in cache and wasn't valid search either")#if search isnt valid
+            return None
+
 
 
 
 ## 3. Using a loop, invoke your function, save the return value in a variable, and explore the 
 ##		data you got back!
-while True:
-	tweets = input('Enter Twitter Search: ')
-	if len(tweets) < 1: break
-	data = getTwitterData(tweets)
+count = 0
+while count < 3: #limit to three searches
+	search = input('Enter Twitter Search: ')
+	if len(search) < 1: break #length of search is greater than one
+	tweets = getTwitterData(search)
+	tweet = tweets["statuses"]#create dictionary of tweets
+	count = 1
+	for t in tweet[:5]:#print text and time tweeted for the first five tweets
+		print("TEXT:", t["text"])
+		print("CREATED AT:", t["created_at"])
+		print("\n")
+	count += 1
+
+
 
 
 ## 4. With what you learn from the data -- e.g. how exactly to find the 
